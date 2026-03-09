@@ -3,7 +3,7 @@ const path = require('path');
 const { v4: uuidv4 } = require('uuid');
 const { parseFile } = require('../services/fileParser');
 const { createEmbedding } = require('../services/ollama');
-const { ensureCollection, upsertPoints } = require('../services/qdrant');
+const { ensureCollection, upsertPoints, passageSparseVector } = require('../services/qdrant');
 
 const DOCS_PATH = process.env.DOCS_PATH;
 const CHUNK_SIZE = 1000;
@@ -79,16 +79,31 @@ async function indexFiles() {
     const points = [];
     for (let i = 0; i < chunks.length; i++) {
       const chunk = chunks[i];
+      
       let vector;
+
       try {
         vector = await createEmbedding(`search_document: ${chunk}`);
       } catch (error) {
         console.error(`Error generando embedding para chunk ${i}: ${error.message}`);
         continue;
       }
+
+      let sparseVector;
+
+      try {
+        sparseVector = await passageSparseVector(chunk);
+      } catch (error) {
+        console.error(`Error generando sparse vector para chunk ${i}: ${error.message}`);
+        continue;
+      }
+
       points.push({
         id: uuidv4(),
-        vector,
+        vector: {
+          dense: vector,
+          sparse: sparseVector,
+        },
         payload: {
           text: chunk,
           file: fileName,

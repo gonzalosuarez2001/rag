@@ -1,24 +1,22 @@
-const axios = require("axios");
+const { Ollama } = require("ollama");
 
-const OLLAMA_URL = process.env.OLLAMA_URL;
+const ollama = new Ollama({ host: process.env.OLLAMA_URL });
 
 async function createEmbedding(text) {
-  const url = `${OLLAMA_URL}/api/embeddings`;
-  const response = await axios.post(url, {
+  const response = await ollama.embeddings({
     model: "nomic-embed-text",
     prompt: text,
   });
-  return response.data.embedding;
+  return response.embedding;
 }
 
 async function chat(messages) {
-  const response = await axios.post(`${OLLAMA_URL}/api/chat`, {
+  const response = await ollama.chat({
     model: "llama3:8b",
     messages,
     stream: false,
   });
-
-  return response.data.message.content;
+  return response.message.content;
 }
 
 module.exports = { createEmbedding, chat };
