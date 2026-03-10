@@ -12,4 +12,6 @@ RUN chmod +x entrypoint.sh
 
 EXPOSE 3000
 
+RUN node src/scripts/download-splade-model.js
+
 CMD ["sh", "entrypoint.sh"]
