@@ -28,10 +28,9 @@ async function classifyIntent(prompt) {
       content: prompt,
     },
   ];
-console.log("Clasificando intención del prompt:", prompt);
+  
   const raw = await chat(messages);
   const intent = raw.trim().toUpperCase();
-console.log("Intención clasificada:", intent);
 
   if (VALID_INTENTS.includes(intent)) {
     return intent;

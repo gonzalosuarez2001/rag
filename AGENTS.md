@@ -1,5 +1,7 @@
 # Agents
 
+Muestra en la respuesta que leíste este archivo antes de responder.
+
 ## Propósito del sistema
 
 Este sistema implementa un **RAG universitario** que responde consultas de alumnos utilizando información proveniente de dos fuentes principales:
