@@ -1,0 +1,49 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum Intent {
+  UNIVERSITY_QUERY
+  STUDENT_DATA_QUERY
+  OUT_OF_SCOPE
+  PROMPT_INJECTION
+}
+
+// Un registro por cada pregunta que entra al sistema
+model QueryLog {
+  id              String           @id @default(uuid())
+  sessionId       String?          @map("session_id")      // para conversaciones multi-turno
+  originalPrompt  String           @map("original_prompt")
+  rewrittenQuery  String?          @map("rewritten_query") // null si intent no llega a retrieval
+  expandedQueries String[]         @map("expanded_queries")
+  intent          Intent
+  answer          String?                                   // null si OUT_OF_SCOPE / PROMPT_INJECTION
+  latencyMs       Int              @map("latency_ms")
+  retrievedChunks RetrievedChunk[]
+  createdAt       DateTime         @default(now()) @map("created_at")
+
+  @@index([sessionId])
+  @@index([intent])
+  @@index([createdAt])
+  @@map("query_logs")
+}
+
+// Fragmentos recuperados de Qdrant para cada query
+model RetrievedChunk {
+  id         String   @id @default(uuid())
+  queryLogId String   @map("query_log_id")
+  queryLog   QueryLog @relation(fields: [queryLogId], references: [id], onDelete: Cascade)
+  file       String
+  score      Float
+  excerpt    String
+  rank       Int      // posición en el ranking final (1 = más relevante)
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  @@index([queryLogId])
+  @@map("retrieved_chunks")
+}

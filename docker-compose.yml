@@ -10,12 +10,17 @@ services:
       - OLLAMA_URL=http://host.docker.internal:11434
       - QDRANT_URL=http://qdrant:6333
       - DOCS_PATH=/docs
+      - DATABASE_URL=postgresql://rag_user:rag_password@postgres:5432/rag_db
+      - NODE_ENV=development
     volumes:
       - ./docs:/docs:ro
       - ./src:/app/src
     extra_hosts:
       - "host.docker.internal:host-gateway"
-
+    depends_on:
+      - qdrant
+      - postgres
+      
   qdrant:
     image: qdrant/qdrant:latest
     container_name: qdrant
@@ -24,5 +29,13 @@ services:
       - "6333:6333"
       - "6334:6334"
 
-volumes:
-  qdrant_data:
+  postgres:
+    image: postgres:16-alpine
+    container_name: postgres
+    restart: unless-stopped
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=rag_user
+      - POSTGRES_PASSWORD=rag_password
+      - POSTGRES_DB=rag_db

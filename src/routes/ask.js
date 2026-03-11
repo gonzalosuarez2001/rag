@@ -9,27 +9,43 @@ const {
 } = require("../services/queryProcessor");
 
 const router = express.Router();
+const { saveQueryLog } = require("../repository/queryLog");
 
 router.post("/", async (req, res) => {
-  const { prompt, history = [] } = req.body;
+  const { prompt, history = [], sessionId } = req.body;
   if (!prompt || typeof prompt !== "string" || !prompt.trim()) {
     return res.status(400).json({ error: 'El campo "prompt" es requerido.' });
   }
 
+  const startTime = Date.now();
+
   try {
     console.log("Prompt recibido:", prompt);
 
-    // Clasificar la intención del prompt
+    // 1. Clasificar la intención del prompt
     const intent = await classifyIntent(prompt);
 
     console.log("Intención clasificada:", intent);
 
-
     if (intent === "OUT_OF_SCOPE") {
+      await saveQueryLog({
+        sessionId,
+        originalPrompt: prompt,
+        intent,
+        latencyMs: Date.now() - startTime,
+        retrievedChunks: [],
+      });
       return res.json({ answer: "No puedo responder esa pregunta." });
     }
 
     if (intent === "PROMPT_INJECTION") {
+      await saveQueryLog({
+        sessionId,
+        originalPrompt: prompt,
+        intent,
+        latencyMs: Date.now() - startTime,
+        retrievedChunks: [],
+      });
       return res.json({ answer: "No puedo procesar esa solicitud." });
     }
 
@@ -56,7 +72,7 @@ router.post("/", async (req, res) => {
         .map((r, i) => `[${i + 1}] (${r.payload.file})\n${r.payload.text}`)
         .join("\n\n");
 
-      // Construir array de mensajes: sistema + historial + pregunta actual
+      // 6. Construir array de mensajes: sistema + historial + pregunta actual
       const messages = [
         {
           role: "system",
@@ -82,8 +98,21 @@ router.post("/", async (req, res) => {
         },
       ];
 
-      // Generar respuesta
+      // 7. Generar respuesta
       const answer = await chat(messages);
+      const latencyMs = Date.now() - startTime;
+
+      // 8. Persistir el log de la query
+      await saveQueryLog({
+        sessionId,
+        originalPrompt: prompt,
+        rewrittenQuery,
+        expandedQueries: allQueries,
+        intent,
+        answer,
+        latencyMs,
+        retrievedChunks: mergedPoints,
+      });
 
       return res.json({
         answer,

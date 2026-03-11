@@ -1,4 +1,7 @@
 #!/bin/sh
+echo "=== Sincronizando schema con la base de datos ==="
+npx prisma db push
+
 echo "=== Indexando documentos ==="
 node src/scripts/indexFiles.js
 

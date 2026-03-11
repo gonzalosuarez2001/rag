@@ -6,9 +6,13 @@
   "scripts": {
     "start": "node src/app.js",
     "dev": "nodemon src/app.js",
-    "index": "node src/scripts/indexFiles.js"
+    "index": "node src/scripts/indexFiles.js",
+    "db:migrate": "prisma migrate dev",
+    "db:generate": "prisma generate",
+    "db:studio": "prisma studio"
   },
   "dependencies": {
+    "@prisma/client": "^6.19.2",
     "@qdrant/js-client-rest": "^1.17.0",
     "axios": "^1.7.2",
     "dotenv": "^17.3.1",
@@ -24,6 +28,7 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "nodemon": "^3.1.14"
+    "nodemon": "^3.1.14",
+    "prisma": "^6.19.2"
   }
 }
