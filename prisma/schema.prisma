@@ -18,9 +18,7 @@ enum Intent {
 model QueryLog {
   id              String           @id @default(uuid())
   sessionId       String?          @map("session_id")      // para conversaciones multi-turno
-  originalPrompt  String           @map("original_prompt")
-  rewrittenQuery  String?          @map("rewritten_query") // null si intent no llega a retrieval
-  expandedQueries String[]         @map("expanded_queries")
+  prompt  String                   @map("prompt")
   intent          Intent
   answer          String?                                   // null si OUT_OF_SCOPE / PROMPT_INJECTION
   latencyMs       Int              @map("latency_ms")

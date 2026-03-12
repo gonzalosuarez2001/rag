@@ -5,7 +5,7 @@ async function main() {
     model: SparseEmbeddingModel.SpladePPEnV1,
   });
 
-  console.log("Modelo descargado");
+  console.log("Modelo sparse descargado");
 }
 
 main();

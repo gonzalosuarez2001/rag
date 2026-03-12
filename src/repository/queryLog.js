@@ -2,9 +2,7 @@ const prisma = require("../services/db");
 
 async function saveQueryLog({
   sessionId,
-  originalPrompt,
-  rewrittenQuery,
-  expandedQueries,
+  prompt,
   intent,
   answer,
   latencyMs,
@@ -14,9 +12,7 @@ async function saveQueryLog({
     await prisma.queryLog.create({
       data: {
         sessionId: sessionId ?? null,
-        originalPrompt,
-        rewrittenQuery: rewrittenQuery ?? null,
-        expandedQueries: expandedQueries ?? [],
+        prompt,
         intent,
         answer: answer ?? null,
         latencyMs,

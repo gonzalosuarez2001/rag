@@ -15,11 +15,12 @@ async function rewriteQuery(prompt, history = []) {
   const messages = [
     {
       role: "system",
-      content: `Eres un asistente que reformula preguntas para mejorar tanto la búsqueda en documentos universitarios
-      como la obtención de información del alumno en una base de datos institucional.
+      content: `Eres un sistema que reescribe las consultas de los usuarios.
         Dado el historial de conversación (si existe) y la pregunta actual, reformula la pregunta para que sea:
-        - Auto-contenida: no dependa del contexto previo de la conversación.
-        - Específica y clara para búsqueda en reglamentos o información universitaria y en bases de datos institucionales.
+        - Concisa.
+        - Auto-contenida.
+        - Explícita.
+        - Optimizada para la búsqueda semántica.
         - En español.
 
         Devuelve ÚNICAMENTE la pregunta reformulada, sin explicaciones ni texto adicional.`,
@@ -40,7 +41,7 @@ async function expandQuery(query) {
     {
       role: "system",
       content: `Eres un asistente que genera variaciones de preguntas para mejorar la recuperación de documentos universitarios.
-        Dado una pregunta, genera exactamente 3 reformulaciones alternativas que mantengan la misma intención pero usen diferentes palabras, estructuras o enfoques.
+        Dado una pregunta, genera exactamente 3 reformulaciones alternativas que mantengan la misma intención.
         Devuelve ÚNICAMENTE las 3 variaciones en idioma español, una por línea, sin numeración, viñetas ni explicaciones.`,
     },
     {

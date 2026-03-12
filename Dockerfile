@@ -13,10 +13,11 @@ RUN npx prisma generate
 COPY src/ ./src/
 
 COPY entrypoint.sh ./
+
+RUN node src/scripts/download-splade-model.js
+
 RUN chmod +x entrypoint.sh
 
 EXPOSE 3000
 
-RUN node src/scripts/download-splade-model.js
 
-CMD ["sh", "entrypoint.sh"]
