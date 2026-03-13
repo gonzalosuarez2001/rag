@@ -39,6 +39,7 @@ model RetrievedChunk {
   file       String
   score      Float
   excerpt    String
+  rerankScore Float?   @map("rerank_score")
   rank       Int      // posición en el ranking final (1 = más relevante)
   createdAt  DateTime @default(now()) @map("created_at")
 

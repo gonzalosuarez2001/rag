@@ -20,6 +20,7 @@ async function saveQueryLog({
           create: retrievedChunks.map((chunk, index) => ({
             file: chunk.payload.file,
             score: chunk.score,
+            rerankScore: chunk.rerankScore ?? null,
             excerpt: chunk.payload.text,
             rank: index + 1,
           })),

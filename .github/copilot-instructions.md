@@ -10,6 +10,7 @@ The system is a **Node.js/Express RAG API** with a single endpoint `POST /ask`.
 - **qdrant**: Vector Store 
 - **postgres**: SQL Database
 - **Ollama**: IA Model
+- **BAAI/bge-reranker-base**: Reranking Model
 
 ## Two Information Sources
 

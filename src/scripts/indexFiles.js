@@ -8,30 +8,58 @@ const { ensureCollection, upsertPoints, passageSparseVector } = require('../serv
 const DOCS_PATH = process.env.DOCS_PATH;
 const CHUNK_SIZE = 1000;
 const CHUNK_OVERLAP = 200;
+const MIN_CHUNK_SIZE = 100;
+const SEPARATORS = ['\n\n', '\n', '. ', ' '];
 
 if (!DOCS_PATH) {
   console.error('Error: La variable de entorno DOCS_PATH no está definida.');
   process.exit(1);
 }
 
-function splitIntoChunks(text, size = CHUNK_SIZE, overlap = CHUNK_OVERLAP) {
-  const chunks = [];
-  let start = 0;
-  while (start < text.length) {
-    let end = start + size;
-    // Extend to the next word boundary to avoid cutting mid-word
-    if (end < text.length) {
-      const nextSpace = text.indexOf(' ', end);
-      end = nextSpace !== -1 ? nextSpace : text.length;
-    }
-    chunks.push(text.slice(start, end).trim());
-    if (end >= text.length) break;
-    // Step back by overlap, aligned to a word boundary
-    const stepEnd = end - overlap;
-    const prevSpace = text.lastIndexOf(' ', stepEnd);
-    start = prevSpace > start ? prevSpace + 1 : stepEnd;
+function applyOverlap(chunks, overlap, separator) {
+  if (chunks.length <= 1) return chunks;
+  const result = [chunks[0]];
+  for (let i = 1; i < chunks.length; i++) {
+    const prev = result[result.length - 1];
+    const tail = prev.slice(-overlap);
+    result.push(tail + separator + chunks[i]);
   }
-  return chunks.filter(c => c.length > 0);
+  return result;
+}
+
+function recursiveSplit(text, separators, size, overlap) {
+  if (text.length <= size) return text.length >= MIN_CHUNK_SIZE ? [text] : [];
+
+  const separator = separators.find(s => text.includes(s)) ?? '';
+  const parts = separator ? text.split(separator) : [...text];
+
+  const chunks = [];
+  let current = '';
+
+  for (const part of parts) {
+    const candidate = current ? current + separator + part : part;
+
+    if (candidate.length <= size) {
+      current = candidate;
+    } else {
+      if (current) chunks.push(current.trim());
+      if (part.length > size) {
+        const subChunks = recursiveSplit(part, separators.slice(1), size, overlap);
+        chunks.push(...subChunks);
+        current = '';
+      } else {
+        current = part;
+      }
+    }
+  }
+
+  if (current.trim().length >= MIN_CHUNK_SIZE) chunks.push(current.trim());
+
+  return applyOverlap(chunks, overlap, separator);
+}
+
+function splitIntoChunks(text, size = CHUNK_SIZE, overlap = CHUNK_OVERLAP) {
+  return recursiveSplit(text.trim(), SEPARATORS, size, overlap);
 }
 
 function getAllFiles(dirPath, fileList = []) {
